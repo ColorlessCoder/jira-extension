@@ -1,0 +1,21 @@
+{
+  "name": "Work Log Assistant",
+  "description": "Help task tracking easier",
+  "version": "1.0",
+  "manifest_version": 3,
+  "permissions": [
+    "storage"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Open the popup"
+  },
+  "icons": {
+    "16": "logo192.png",
+    "48": "logo192.png",
+    "128": "logo192.png"
+  },
+  "host_permissions": [
+    "https://*/"
+  ]
+}
