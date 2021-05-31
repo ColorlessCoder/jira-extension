@@ -1,10 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { loadSettings, saveJiraDomainUrl } from '../thunks/settingsThunks';
+import { JiraUserInt } from '../../types';
+import { getAllUsersOfProject, loadSettings, saveJiraDomainUrl } from '../thunks/settingsThunks';
 import sliceNames from './sliceNames'
 const settingsSlice = createSlice({
   name: sliceNames.settingsSliceName,
   initialState: {
-    jiraDomainUrl: ""
+    jiraDomainUrl: "",
+    jiraUsers: [] as JiraUserInt[]
   },
   reducers: {
     setDomainUrl: (state, action: PayloadAction<string>) => {
@@ -19,6 +21,9 @@ const settingsSlice = createSlice({
     });
     builder.addCase(saveJiraDomainUrl.fulfilled, (state, action) => {
       state.jiraDomainUrl = action.payload
+    });
+    builder.addCase(getAllUsersOfProject.fulfilled, (state, action) => {
+      state.jiraUsers = action.payload
     });
   }
 })

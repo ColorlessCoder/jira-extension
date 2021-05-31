@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import WorkLogDao from "../../services/storage/dao/workLogDao";
-import { PendingWorkLogInt } from "../../types";
+import { NoteInt, PendingWorkLogInt } from "../../types";
 import sliceNames from "../slices/sliceNames";
 import lodash from "lodash"
 import { dayWiseWorkLogDateFormat, JiraDateTimeFormat } from "../../utils/dateUtils";
@@ -66,11 +66,27 @@ export const pausePendingWorkLog = createAsyncThunk(
 export const uploadPendingWorkLog = createAsyncThunk(
     workLogSliceName + "/uploadPendingWorkLog",
     async (pendingWorkLog: PendingWorkLogInt) => {
-        const uploadedWorkLog = await StaticServices.JiraRestApiService.postWorkLog(pendingWorkLog)
-        await WorkLogDao.removePendingWorkLog(pendingWorkLog.id)
-        return {
-            uploadedWorkLog,
-            pendingWorkLog
+        try {
+            console.log("Uploading")
+            const uploadedWorkLog = await StaticServices.JiraRestApiService.postWorkLog(pendingWorkLog)
+            await WorkLogDao.removePendingWorkLog(pendingWorkLog.id)
+            let notes = undefined
+            if (pendingWorkLog.hasNotes && pendingWorkLog.notes) {
+                notes = {
+                    ...pendingWorkLog.notes,
+                    issueKey: pendingWorkLog.issueKey, issueSummaryText: pendingWorkLog.issueSummaryText,
+                    spentTime: pendingWorkLog.timeSpentSeconds,
+                    createAt: moment(pendingWorkLog.started, JiraDateTimeFormat).toDate().getTime()
+                }
+                await WorkLogDao.saveNote(notes)
+            }
+            return {
+                uploadedWorkLog,
+                pendingWorkLog: {...pendingWorkLog, notes}
+            }
+        } catch (e) {
+            console.log(e)
+            throw e
         }
     }
 );
@@ -82,5 +98,37 @@ export const loadWorkLogsByDate = createAsyncThunk(
             workLogs: await StaticServices.JiraRestApiService.getWorkLogsByDate(date),
             date: moment(date).format(dayWiseWorkLogDateFormat)
         }
+    }
+);
+
+export const addNote = createAsyncThunk(
+    workLogSliceName + "/addNote",
+    async (Note: NoteInt) => {
+        await WorkLogDao.saveNote(Note)
+        return Note
+    }
+);
+
+export const updateNote = createAsyncThunk(
+    workLogSliceName + "/updateNote",
+    async (Note: NoteInt) => {
+        await WorkLogDao.saveNote(Note)
+        return Note
+    }
+);
+
+export const deleteNote = createAsyncThunk(
+    workLogSliceName + "/deleteNote",
+    async (id: string) => {
+        await WorkLogDao.removeNote(id)
+        return id
+    }
+);
+
+export const loadNotes = createAsyncThunk(
+    workLogSliceName + "/loadAllNote",
+    async () => {
+        let response = await WorkLogDao.getAllNotes()
+        return response
     }
 );

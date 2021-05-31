@@ -13,7 +13,7 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import { Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks/storeHooks';
 import { actions } from '../../store/actions';
-import { Receipt } from '@material-ui/icons';
+import { Note, Receipt } from '@material-ui/icons';
 
 export const drawerWidth = 240;
 
@@ -85,10 +85,16 @@ export default function MenuDrawer() {
         <ListItemText primary={"Work Log"} />
       </ListItem>
     </List>
-    <List>
+    {/* <List>
       <ListItem button component={Link} to="/scrum">
         <ListItemIcon><Receipt /></ListItemIcon>
         <ListItemText primary={"Scrum Generator"} />
+      </ListItem>
+    </List> */}
+    <List>
+      <ListItem button component={Link} to="/notes">
+        <ListItemIcon><Note /></ListItemIcon>
+        <ListItemText primary={"Notes"} />
       </ListItem>
     </List>
     <Divider />

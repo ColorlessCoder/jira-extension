@@ -1,9 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import moment from 'moment'
-import { JiraWorkLogInt, PendingWorkLogInt } from '../../types';
+import { JiraWorkLogInt, NoteInt, PendingWorkLogInt } from '../../types';
 import lodash from 'lodash';
 import { dayWiseWorkLogDateFormat, JiraDateTimeFormat } from '../../utils/dateUtils';
-import { addPendingWorkLog, deletePendingWorkLog, loadPendingWorkLogs, loadWorkLogsByDate, pausePendingWorkLog, resumePendingWorkLog, updatePendingWorkLog, uploadPendingWorkLog } from '../thunks/workLogThunks';
+import { addNote, addPendingWorkLog, deleteNote, deletePendingWorkLog, loadNotes, loadPendingWorkLogs, loadWorkLogsByDate, pausePendingWorkLog, resumePendingWorkLog, updateNote, updatePendingWorkLog, uploadPendingWorkLog } from '../thunks/workLogThunks';
 import sliceNames from './sliceNames';
 const workLogSlice = createSlice({
   name: sliceNames.workLogSliceName,
@@ -11,7 +11,8 @@ const workLogSlice = createSlice({
     dayWiseWorkLogDate: moment().format(dayWiseWorkLogDateFormat),
     pendingWorkLog: [] as PendingWorkLogInt[],
     submittedWorkLogs: [] as JiraWorkLogInt[],
-    datesForWhichWorkLogsLoaded: [] as string[]
+    datesForWhichWorkLogsLoaded: [] as string[],
+    notes: [] as NoteInt[]
   },
   reducers: {
     incrementCurrentDate: (state) => {
@@ -66,6 +67,10 @@ const workLogSlice = createSlice({
         state.pendingWorkLog.splice(index, 1);
       }
       state.submittedWorkLogs.push(action.payload.uploadedWorkLog)
+      const pendingWorkLog = action.payload.pendingWorkLog
+      if (pendingWorkLog.hasNotes && pendingWorkLog.notes) {
+        state.notes.push(pendingWorkLog.notes)
+      }
     });
     builder.addCase(loadWorkLogsByDate.fulfilled, (state, action) => {
       console.log("Submitted WorkLog old", lodash.cloneDeep(state.submittedWorkLogs))
@@ -77,6 +82,23 @@ const workLogSlice = createSlice({
       const dateString = action.payload.date
       if (state.datesForWhichWorkLogsLoaded.indexOf(dateString) < 0) {
         state.datesForWhichWorkLogsLoaded.push(dateString)
+      }
+    });
+
+    builder.addCase(loadNotes.fulfilled, (state, action) => {
+      state.notes = action.payload
+    });
+    builder.addCase(addNote.fulfilled, (state, action) => {
+      state.notes.push(action.payload)
+    });
+    builder.addCase(updateNote.fulfilled, (state, action) => {
+      let notes = state.notes.find(r => r.id === action.payload.id);
+      lodash.merge(notes, action.payload);
+    });
+    builder.addCase(deleteNote.fulfilled, (state, action) => {
+      const index = state.notes.findIndex(r => r.id === action.payload)
+      if (index !== -1) {
+        state.notes.splice(index, 1);
       }
     });
   }

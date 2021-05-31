@@ -20,8 +20,10 @@ import Switch from '@material-ui/core/Switch';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import { ClearAllRounded } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
+import FilterData, { filter, FilterType, OperatorType } from './FilterData';
 
 type SelectionMode = "multiple" | "single"| "none"
+type Order = 'asc' | 'desc';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
     if (b[orderBy] < a[orderBy]) {
@@ -33,7 +35,6 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
     return 0;
 }
 
-type Order = 'asc' | 'desc';
 
 function getComparator<Key extends keyof any & string>(
     order: Order,
@@ -55,15 +56,21 @@ function stableSort<T>(array: T[], comparator: (a: T, b: T) => number) {
     return stabilizedThis.map((el) => el[0]);
 }
 
-interface ColumnType<T> {
-    id: keyof T & string;
+interface ColumnType<T, V extends (keyof T & string)> extends BasicColumnType<T, V>{
     disablePadding: boolean;
-    label: string;
-    numeric: boolean;
     disableSorting?: boolean;
     renderColumn?: (row: T) => any;
     align: "center" | "right" | "left";
     descendingComparator?: (a: any, b:any) => 0|1|-1
+}
+
+export interface BasicColumnType<T, V extends (keyof T & string)> {
+    id: V;
+    label: string;
+    numeric: boolean;
+    showFilters?: boolean;
+    comparator?: (operator: OperatorType, a: T[V], b:string, defaultComparator: (operator: OperatorType, a: any, b: string) => boolean) => boolean|null;
+    filterOperators?: OperatorType[]
 }
 
 interface EnhancedTableProps<T> {
@@ -75,8 +82,9 @@ interface EnhancedTableProps<T> {
     orderBy: string | undefined;
     rowCount: number;
     selectionMode: SelectionMode;
-    columns: ColumnType<T>[];
+    columns: ColumnType<T, keyof T & string>[];
 }
+
 const StyledTableSortLabel = withStyles((theme: Theme) =>
 createStyles({
     root: {
@@ -191,12 +199,13 @@ interface EnhancedTableToolbarProps<T> {
     selectedRows: T[];
     headerTitle?: string;
     selectionActions?: ToolbarSelectionActionInt<T>[];
-    clearSortingAndFilter: () => any
+    clearSortingAndFilter: () => any;
+    openFilters: () => any
 }
 
 const EnhancedTableToolbar = <T extends unknown>(props: EnhancedTableToolbarProps<T>) => {
     const classes = useToolbarStyles();
-    const { selectedRows, headerTitle, clearSortingAndFilter } = props;
+    const { selectedRows, headerTitle, clearSortingAndFilter, openFilters } = props;
     const numSelected = selectedRows.length
     const selectionActions = props.selectionActions ? props.selectionActions : []
     return (
@@ -228,7 +237,7 @@ const EnhancedTableToolbar = <T extends unknown>(props: EnhancedTableToolbarProp
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Filter list">
-                        <IconButton aria-label="filter list">
+                        <IconButton aria-label="filter list" onClick={() => openFilters()}>
                             <FilterListIcon />
                         </IconButton>
                     </Tooltip>
@@ -278,7 +287,7 @@ interface EnhancedTablePropsInt<T> {
         defaultSorting?: keyof T & string,
         defaultSortingOrder: Order
     }
-    columns: ColumnType<T>[],
+    columns: ColumnType<T, keyof T & string>[],
     style?: any
     fixedTopRowKey?: string
 }
@@ -292,6 +301,8 @@ export default function EnhancedTable<T>(props: EnhancedTablePropsInt<T>) {
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
+    const [filters, setFilters] = React.useState<FilterType<T>[]>([])
+    const [showFilters, setShowFilters] = React.useState<boolean>(false)
 
     React.useEffect(() => {
         if (selected.length) {
@@ -365,7 +376,7 @@ export default function EnhancedTable<T>(props: EnhancedTablePropsInt<T>) {
 
     const isSelected = (rowKey: string) => selected.findIndex(r => getRowKey(r) === rowKey) !== -1;
 
-    let filteredRows = data;
+    let filteredRows = filter(data, columns, filters);
     if (orderBy) {
         filteredRows = stableSort(filteredRows, getComparator(order, orderBy, columns.find(r => r.id === orderBy)?.descendingComparator))
     }
@@ -384,7 +395,8 @@ export default function EnhancedTable<T>(props: EnhancedTablePropsInt<T>) {
                     selectedRows={selected}
                     headerTitle={headerTitle}
                     selectionActions={selection.actions}
-                    clearSortingAndFilter={() => orderBy && setOrderBy(undefined)} />
+                    clearSortingAndFilter={() => orderBy && setOrderBy(undefined)}
+                    openFilters={() => setShowFilters(true)} />
                 <TableContainer>
                     <Table
                         className={classes.table}
@@ -445,7 +457,7 @@ export default function EnhancedTable<T>(props: EnhancedTablePropsInt<T>) {
                     </Table>
                 </TableContainer>
                 <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
+                    rowsPerPageOptions={[5, 10, 25, 100]}
                     component="div"
                     count={filteredRows.length}
                     rowsPerPage={rowsPerPage}
@@ -458,6 +470,16 @@ export default function EnhancedTable<T>(props: EnhancedTablePropsInt<T>) {
                 control={<Switch checked={dense} onChange={handleChangeDense} />}
                 label="Dense padding"
             />
+            {
+                showFilters && <FilterData
+                    data={data}
+                    columns={columns}
+                    filters={filters}
+                    headerTitle={headerTitle}
+                    onChange={a => (setFilters(a), setShowFilters(false))}
+                    onClose={() => setShowFilters(false)}
+                />
+            }
         </div>
     );
 }

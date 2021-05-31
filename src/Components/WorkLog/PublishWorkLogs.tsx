@@ -16,7 +16,7 @@ export default function PublishWorkLogs({ workLogs, onClose }: { workLogs: Pendi
     const publish = () => {
         let promises: Promise<any>[] = []
         workLogs.forEach(r => promises.push(dispatch(uploadPendingWorkLog(r))))
-        Promise.all(promises).then(() => onClose())
+        Promise.all(promises).then(() => onClose()).catch(err => console.error(err))
     }
 
     return <Dialog open={true} aria-labelledby="form-dialog-title" maxWidth="lg">

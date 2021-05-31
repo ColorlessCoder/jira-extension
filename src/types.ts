@@ -18,7 +18,23 @@ export interface JiraWorkLogInt {
 }
 
 export interface PendingWorkLogInt extends JiraWorkLogInt{
-    resumed: string
+    resumed: string,
+    hasNotes?: boolean,
+    notes?: NoteInt
+}
+
+export type NoteTypeInt = "Discussion" | "Code Review"| "Others"
+
+export interface NoteInt {
+    id: string,
+    type: NoteTypeInt,
+    rating: number|null,
+    forUser?: JiraUserPickerInt,
+    details: string,
+    createAt?: number,
+    spentTime?: number,
+    issueKey?: string,
+    issueSummaryText?: string
 }
 
 export interface JiraCommentInt extends JiraCommentNodeInt {
@@ -88,7 +104,14 @@ export interface JiraUserInt {
         "32x32": string,
         "24x24": string,
         "16x16": string,
-    }
+    },
+    projectKey?: string
+}
+
+export interface JiraUserPickerInt {
+    displayName: string,
+    avatarUrl: string,
+    accountId: string
 }
 
 export interface SettingsInt {

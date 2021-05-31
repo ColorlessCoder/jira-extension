@@ -1,4 +1,4 @@
-import { JiraIssueBasicInt, JiraIssuePickerResponseInt, JiraIssueWorkLogResponseInt, JiraWorkLogInt, PendingWorkLogInt } from '../types';
+import { JiraIssueBasicInt, JiraIssuePickerResponseInt, JiraIssueWorkLogResponseInt, JiraUserInt, JiraUserPickerInt, JiraWorkLogInt, PendingWorkLogInt } from '../types';
 import HttpService from './HttpService';
 import devEnv from "../devEnv";
 import { addRemainingSecondsToRound, convertJiraCommentToText, convertTextToJiraComment } from '../utils/jiraUtils';
@@ -165,5 +165,22 @@ export default class JiraRestApiService {
         url += `?fields=summary,assignee,customfield_10901`
         const json = await HttpService.get(url, this.getJiraHeaders(), true);
         return json.fields;
+    }
+
+    getAllUsersOfProject = async (projectKey: string): Promise<any> => {
+        let url = this.getJiraRestUrlPrefix() + `/user/assignable/multiProjectSearch`;
+        url += `?projectKeys=${projectKey}`
+        const json = await HttpService.get(url, this.getJiraHeaders(), true);
+        const data = json as JiraUserInt[];
+        data.forEach(u => u.projectKey = projectKey)
+        return data
+    }
+
+    getAllUsersForPicker = async (query: string): Promise<any> => {
+        let url = this.getJiraRestUrlPrefix() + `/user/picker`;
+        url += `?query=${query}&showAvatar=true`
+        const json = await HttpService.get(url, this.getJiraHeaders(), true);
+        const data = json.users as JiraUserPickerInt[];
+        return data
     }
 }

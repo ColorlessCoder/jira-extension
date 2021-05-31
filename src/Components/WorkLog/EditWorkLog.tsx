@@ -1,11 +1,11 @@
-import { Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Grid, setRef, TextField, Typography } from "@material-ui/core";
+import { Button, Checkbox, Chip, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Grid, setRef, TextField, Typography } from "@material-ui/core";
 import { Clear, ErrorSharp } from "@material-ui/icons";
 import * as uuid from "uuid"
 import moment from "moment";
 import lodash from "lodash";
 import React, { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/storeHooks";
-import { JiraIssueBasicInt, PendingWorkLogInt } from "../../types";
+import { JiraIssueBasicInt, NoteInt, PendingWorkLogInt } from "../../types";
 import { dayWiseWorkLogDateFormat, JiraDateTimeFormat, UiDateTimeLocalFormat } from "../../utils/dateUtils";
 import { convertJiraCommentToText, convertTextToJiraComment } from "../../utils/jiraUtils";
 import { JiraIssueSearch } from "../BasicComponents/JiraIssueSearch";
@@ -13,6 +13,7 @@ import { JiraTimeInput } from "../BasicComponents/JiraTimeInput";
 import { addPendingWorkLog, updatePendingWorkLog } from "../../store/thunks/workLogThunks";
 import CommentSuggestions from "../BasicComponents/CommentSuggestions";
 import { Avatar } from "@material-ui/core";
+import EditNotes from "./EditNotes";
 
 export function getBlankWorkLog() {
     let workLog: PendingWorkLogInt = {
@@ -26,6 +27,15 @@ export function getBlankWorkLog() {
         resumed: ""
     }
     return workLog;
+}
+
+export function getBlankNote(): NoteInt {
+    return {
+        id: uuid.v4(),
+        details: "",
+        type: "Others",
+        rating: null
+    }
 }
 
 interface PropsType {
@@ -51,7 +61,10 @@ export function EditWorkLog(props: PropsType) {
     const [timeSpentSeconds, setTimeSpentSeconds] = useState<number>(props.workLog ? props.workLog.timeSpentSeconds : 0)
     const [comment, setComment] = useState<string>(props.workLog ? convertJiraCommentToText(props.workLog.comment) : "");
     const [errorText, setErrorText] = useState<string>("");
+    const [hasNotes, setHasNotes] = useState<boolean>(props.workLog && props.workLog.hasNotes ? true: false)
+    const [notes, setNotes] = useState<NoteInt>(props.workLog && props.workLog.notes ? props.workLog.notes: getBlankNote())
     const resumed = props.workLog && props.workLog.resumed ? moment(props.workLog.resumed, JiraDateTimeFormat).format(UiDateTimeLocalFormat) : "";
+    const [saveEnabled, setSaveEnabled] = useState<boolean>(true)
     const isNew = props.create
 
     const validate = () => {
@@ -83,6 +96,8 @@ export function EditWorkLog(props: PropsType) {
         workLog.started = moment(started, UiDateTimeLocalFormat).format(JiraDateTimeFormat)
         workLog.timeSpentSeconds = timeSpentSeconds
         workLog.comment = convertTextToJiraComment(comment)
+        workLog.hasNotes = hasNotes
+        workLog.notes = notes
         return workLog
     }
 
@@ -148,7 +163,7 @@ export function EditWorkLog(props: PropsType) {
                 <Grid xs={12} style={{ margin: 10 }}>
                     <Grid container>
                         <Grid item xs={2}>
-                            <Chip avatar={<Avatar><Clear/></Avatar>} label="Clear" color="secondary" variant="outlined" onClick={() => setComment("")}/>
+                            <Chip avatar={<Avatar><Clear /></Avatar>} label="Clear" color="secondary" variant="outlined" onClick={() => setComment("")} />
                         </Grid>
                         <Grid item xs={10}>
                             <CommentSuggestions issueKey={issue ? issue.key : ""} onClick={setComment} />
@@ -161,10 +176,28 @@ export function EditWorkLog(props: PropsType) {
                         {errorText}
                     </Typography>
                 </Grid>}
+                <Grid xs={12} style={{ margin: 10 }}>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={hasNotes}
+                                color="primary"
+                                onChange={(e) => {
+                                    setSaveEnabled(!e.target.checked)
+                                    setHasNotes(e.target.checked)
+                                }}
+                            />
+                        }
+                        label="Add Notes"
+                    />
+                    {
+                        hasNotes && <EditNotes note={notes} onSave={(n) => (setNotes(n), setSaveEnabled(true))} initialOnEditMode={!saveEnabled} onChange={() => setSaveEnabled(false)}/>
+                    }
+                </Grid>
             </Grid>
         </DialogContent>
         <DialogActions>
-            <Button onClick={() => saveWorkLog()} color="primary" variant="contained">Save</Button>
+            <Button onClick={() => saveWorkLog()} color="primary" variant="contained" disabled={!saveEnabled}>Save</Button>
             <Button onClick={props.onClose} color="secondary">Cancel</Button>
         </DialogActions>
     </Dialog>

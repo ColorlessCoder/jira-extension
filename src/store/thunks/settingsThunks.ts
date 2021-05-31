@@ -24,3 +24,10 @@ export const saveJiraDomainUrl = createAsyncThunk(
         return url
     }
 );
+
+export const getAllUsersOfProject = createAsyncThunk(
+    settingsSliceName + "/getAllUsersOfProject",
+    async (projectKey: string) => {
+        return await StaticServices.JiraRestApiService.getAllUsersOfProject(projectKey)
+    }
+);
