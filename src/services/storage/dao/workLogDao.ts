@@ -1,10 +1,38 @@
 import { NoteInt, PendingWorkLogInt } from "../../../types";
+import BaseDao from './baseDao'
 import storage from "../index";
 
 const PENDING_WORK_LOG = "PENDING_WORK_LOG";
 const NOTES = "NOTES";
 
-export default class WorkLogDao {
+export interface WorkLogDaoDataInt {
+    workLogs: PendingWorkLogInt[],
+    notes: NoteInt[]
+}
+
+export default class WorkLogDao implements BaseDao<WorkLogDaoDataInt>{
+    exportData = async (): Promise<WorkLogDaoDataInt>  => {
+        return {
+            workLogs: await WorkLogDao.getAllPendingWorkLogs(),
+            notes: await WorkLogDao.getAllNotes()
+        }
+    }
+
+    importData= async (data: WorkLogDaoDataInt): Promise<any> => {
+        if(data) {
+            if(data.workLogs) {
+                for(let workLog of data.workLogs) {
+                    await WorkLogDao.savePendingWorkLog(workLog)
+                }
+            }
+            if(data.notes) {
+                for(let note of data.notes) {
+                    await WorkLogDao.saveNote(note)
+                }
+            }
+        }
+    }
+
     static getAllPendingWorkLogs = async () => {
         let pendingWorkLogs: PendingWorkLogInt[] = []
         const logIds = await storage.get<string[]>(PENDING_WORK_LOG);

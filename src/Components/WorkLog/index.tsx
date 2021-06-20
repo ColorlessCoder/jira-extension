@@ -4,6 +4,7 @@ import 'react-splitter-layout/lib/index.css';
 import { useAppDispatch } from '../../hooks/storeHooks';
 import { actions } from '../../store/actions';
 import { DayWiseWorkLog } from './DayWiseWorkLog';
+import WeeklyWorklogs from './WeeklyWorklogs';
 
 export function WorkLog() {
   const dispatch = useAppDispatch();
@@ -13,12 +14,14 @@ export function WorkLog() {
   }, [dispatch])
   console.log("Normal Load")
   return (
-    <SplitterLayout percentage={true} vertical={false} secondaryInitialSize={20}>
+    <SplitterLayout percentage={true} vertical={false} secondaryInitialSize={25}>
       <div style={{padding: 10}}>
         <DayWiseWorkLog />
       </div>
-      <SplitterLayout percentage={true} vertical={true} secondaryInitialSize={50}>
-        <div />
+      <SplitterLayout percentage={true} vertical={true} secondaryInitialSize={30}>
+        <div style={{padding: 10}}>
+          <WeeklyWorklogs />
+        </div>
         <div />
       </SplitterLayout>
     </SplitterLayout>

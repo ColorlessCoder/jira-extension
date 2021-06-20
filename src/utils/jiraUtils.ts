@@ -57,8 +57,13 @@ export function convertTimeInSecondToJiraTimeFormat(timeInSecond: number, roundS
     }
     return {
         text: strList.join(" "),
-        seconds: roundSeconds ? (seconds - 60) : seconds
+        seconds: (roundSeconds && seconds) ? (seconds - 60) : seconds
     };
+}
+
+export function roundTimeInSeconds(timeInSecond: number) {
+    const res =  convertTimeInSecondToJiraTimeFormat(timeInSecond, true)
+    return timeInSecond - res.seconds
 }
 
 export function addRemainingSecondsToRound(timeInSecond: number) {

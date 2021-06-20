@@ -32,8 +32,8 @@ const workLogSlice = createSlice({
         state.dayWiseWorkLogDate = action.payload.stringValue
       }
     },
-    reloadSubmittedWorkLogs: (state, action: PayloadAction<Date>) => {
-      state.datesForWhichWorkLogsLoaded = state.datesForWhichWorkLogsLoaded.filter(r => r === moment(action.payload).format(dayWiseWorkLogDateFormat))
+    reloadSubmittedWorkLogs: (state, action: PayloadAction<Set<string>>) => {
+      state.datesForWhichWorkLogsLoaded = state.datesForWhichWorkLogsLoaded.filter(r => !action.payload.has(r))
     }
   },
   extraReducers: (builder) => {

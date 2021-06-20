@@ -4,6 +4,7 @@ import Settings from "../Settings"
 import ScrumGenerator from "../Reports/ScrumGenerator";
 import React from "react";
 import NoteList from "../Notes/NoteList";
+import Backup from "../Backup";
 export default function MainMenuContent() {
     return (
         <Switch>
@@ -18,6 +19,9 @@ export default function MainMenuContent() {
             </Route>
             <Route path="/settings">
                 <Settings />
+            </Route>
+            <Route path="/backup">
+                <Backup />
             </Route>
         </Switch>
     );
