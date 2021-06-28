@@ -10,7 +10,7 @@ import { dayWiseWorkLogDateFormat, JiraDateTimeFormat, UiDateTimeLocalFormat } f
 import { convertJiraCommentToText, convertTextToJiraComment } from "../../utils/jiraUtils";
 import { JiraIssueSearch } from "../BasicComponents/JiraIssueSearch";
 import { JiraTimeInput } from "../BasicComponents/JiraTimeInput";
-import { addPendingWorkLog, updatePendingWorkLog } from "../../store/thunks/workLogThunks";
+import { addPendingWorkLog, pausePendingWorkLog, resumePendingWorkLog, updatePendingWorkLog } from "../../store/thunks/workLogThunks";
 import CommentSuggestions from "../BasicComponents/CommentSuggestions";
 import { Avatar } from "@material-ui/core";
 import EditNotes from "./EditNotes";
@@ -61,8 +61,8 @@ export function EditWorkLog(props: PropsType) {
     const [timeSpentSeconds, setTimeSpentSeconds] = useState<number>(props.workLog ? props.workLog.timeSpentSeconds : 0)
     const [comment, setComment] = useState<string>(props.workLog ? convertJiraCommentToText(props.workLog.comment) : "");
     const [errorText, setErrorText] = useState<string>("");
-    const [hasNotes, setHasNotes] = useState<boolean>(props.workLog && props.workLog.hasNotes ? true: false)
-    const [notes, setNotes] = useState<NoteInt>(props.workLog && props.workLog.notes ? props.workLog.notes: getBlankNote())
+    const [hasNotes, setHasNotes] = useState<boolean>(props.workLog && props.workLog.hasNotes ? true : false)
+    const [notes, setNotes] = useState<NoteInt>(props.workLog && props.workLog.notes ? props.workLog.notes : getBlankNote())
     const resumed = props.workLog && props.workLog.resumed ? moment(props.workLog.resumed, JiraDateTimeFormat).format(UiDateTimeLocalFormat) : "";
     const [saveEnabled, setSaveEnabled] = useState<boolean>(true)
     const isNew = props.create
@@ -101,11 +101,16 @@ export function EditWorkLog(props: PropsType) {
         return workLog
     }
 
-    const saveWorkLog = () => {
+    const saveWorkLog = (start?: boolean) => {
         if (validate()) {
             const workLog = getUpdatedWorkLog();
-            dispatch(isNew ? addPendingWorkLog(workLog) : updatePendingWorkLog(workLog))
-                .then(() => props.onClose())
+            let promise:Promise<any> = dispatch(isNew ? addPendingWorkLog(workLog) : updatePendingWorkLog(workLog))
+            if (start) {
+                promise = promise
+                    .then(() => dispatch(pausePendingWorkLog(null)))
+                    .then(() => dispatch(resumePendingWorkLog(workLog)))
+            }
+            promise.then(() => props.onClose())
                 .catch(console.error)
         }
     }
@@ -191,12 +196,13 @@ export function EditWorkLog(props: PropsType) {
                         label="Add Notes"
                     />
                     {
-                        hasNotes && <EditNotes note={notes} onSave={(n) => (setNotes(n), setSaveEnabled(true))} initialOnEditMode={!saveEnabled} onChange={() => setSaveEnabled(false)}/>
+                        hasNotes && <EditNotes note={notes} onSave={(n) => (setNotes(n), setSaveEnabled(true))} initialOnEditMode={!saveEnabled} onChange={() => setSaveEnabled(false)} />
                     }
                 </Grid>
             </Grid>
         </DialogContent>
         <DialogActions>
+            {isNew && <Button onClick={() => saveWorkLog(true)} color="primary" variant="outlined" disabled={!saveEnabled}>Save and Start</Button>}
             <Button onClick={() => saveWorkLog()} color="primary" variant="contained" disabled={!saveEnabled}>Save</Button>
             <Button onClick={props.onClose} color="secondary">Cancel</Button>
         </DialogActions>

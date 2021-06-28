@@ -58,8 +58,11 @@ const workLogSlice = createSlice({
       lodash.merge(workLog, action.payload);
     });
     builder.addCase(pausePendingWorkLog.fulfilled, (state, action) => {
-      let workLog = state.pendingWorkLog.find(r => r.id === action.payload.id);
-      lodash.merge(workLog, action.payload);
+      if (action.payload !== null) {
+        let workLog = state.pendingWorkLog.find(r => r.id === action.payload?.id);
+        lodash.merge(workLog, action.payload);
+        console.log("updatedWork:" , workLog)
+      }
     });
     builder.addCase(uploadPendingWorkLog.fulfilled, (state, action) => {
       const index = state.pendingWorkLog.findIndex(r => r.id === action.payload.pendingWorkLog.id)

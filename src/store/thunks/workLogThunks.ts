@@ -6,12 +6,16 @@ import lodash from "lodash"
 import { dayWiseWorkLogDateFormat, JiraDateTimeFormat } from "../../utils/dateUtils";
 import moment from "moment";
 import StaticServices from "../../services";
+import { RootState } from "..";
 
 const workLogSliceName = sliceNames.workLogSliceName
 
 export const addPendingWorkLog = createAsyncThunk(
     workLogSliceName + "/addPendingWorkLog",
     async (pendingWorkLog: PendingWorkLogInt) => {
+        if(pendingWorkLog.resumed) {
+            
+        }
         await WorkLogDao.savePendingWorkLog(pendingWorkLog)
         return pendingWorkLog
     }
@@ -51,14 +55,27 @@ export const resumePendingWorkLog = createAsyncThunk(
     }
 );
 
-export const pausePendingWorkLog = createAsyncThunk(
-    workLogSliceName + "/pausePendingWorkLog",
-    async (pendingWorkLog: PendingWorkLogInt) => {
-        const updatedWorkLog = lodash.clone(pendingWorkLog)
+async function pauseWorkLog(pendingWorkLog: PendingWorkLogInt| null, state: RootState) {
+    let updatedWorkLog: PendingWorkLogInt|null|undefined = pendingWorkLog
+    // const state = getState() as RootState
+    if(pendingWorkLog == null) {
+        updatedWorkLog = state.workLog.pendingWorkLog.find(r => r.resumed)
+    }
+    updatedWorkLog = lodash.cloneDeep(updatedWorkLog)
+    if(updatedWorkLog) {
         updatedWorkLog.timeSpentSeconds += (moment().toDate().getTime() - moment(updatedWorkLog.resumed, JiraDateTimeFormat).toDate().getTime()) / 1000
         updatedWorkLog.timeSpentSeconds = Math.ceil(updatedWorkLog.timeSpentSeconds)
         updatedWorkLog.resumed = ""
         await WorkLogDao.savePendingWorkLog(updatedWorkLog)
+        console.log("updatedWork:" , updatedWorkLog)
+    }
+    return updatedWorkLog
+}
+
+export const pausePendingWorkLog = createAsyncThunk(
+    workLogSliceName + "/pausePendingWorkLog",
+    async (pendingWorkLog: PendingWorkLogInt|null, {getState}) => {
+        const updatedWorkLog = await pauseWorkLog(pendingWorkLog, getState() as RootState)
         return updatedWorkLog
     }
 );
