@@ -117,7 +117,7 @@ export function EditWorkLog(props: PropsType) {
 
     console.log("Time", props)
 
-    return <Dialog open={true} aria-labelledby="form-dialog-title">
+    return <Dialog open={true} aria-labelledby="form-dialog-title" maxWidth="md">
         <DialogTitle id="form-dialog-title">{props.workLog ? "Edit Work Log" : "Create Work Log"}</DialogTitle>
         <DialogContent>
             <Grid container>
@@ -167,10 +167,10 @@ export function EditWorkLog(props: PropsType) {
                 </Grid>
                 <Grid xs={12} style={{ margin: 10 }}>
                     <Grid container>
-                        <Grid item xs={2}>
+                        <Grid item xs={1}>
                             <Chip avatar={<Avatar><Clear /></Avatar>} label="Clear" color="secondary" variant="outlined" onClick={() => setComment("")} />
                         </Grid>
-                        <Grid item xs={10}>
+                        <Grid item xs={11}>
                             <CommentSuggestions issueKey={issue ? issue.key : ""} onClick={setComment} />
                         </Grid>
                     </Grid>

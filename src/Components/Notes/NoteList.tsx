@@ -1,13 +1,13 @@
 import React, { Fragment, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/storeHooks";
-import { workLogActions } from "../../store/slices/workLogSlice";
-import { loadNotes } from "../../store/thunks/workLogThunks";
+import { deleteNote, loadNotes } from "../../store/thunks/workLogThunks";
 import EnhancedTable from "../BasicComponents/EnhancedTable";
 import lodash from 'lodash'
 import { Avatar, Grid } from "@material-ui/core";
 import moment from "moment";
 import JiraTimeView from "../BasicComponents/JiraTimeView";
 import { JiraUserPickerInt } from "../../types";
+import { Delete } from "@material-ui/icons";
 
 export default function NoteList() {
     const notes = useAppSelector(s => s.workLog.notes)
@@ -22,15 +22,15 @@ export default function NoteList() {
         data={notes}
         getRowKey={(r) => r.id}
         selection={{
-            mode: "none",
-            by: "row",
+            mode: "multiple",
+            by: "checkbox",
             actions: [
-                // {
-                //     toolTipText: () => "Edit",
-                //     renderIcon: () => <Edit />,
-                //     disabled: (rows) => rows.length !== 1,
-                //     onClick: (rows) => setCurrentSelectedWorkLog(rows[0])
-                // },
+                {
+                    toolTipText: () => "Delete",
+                    renderIcon: () => <Delete />,
+                    disabled: (rows) => rows.length === 0,
+                    onClick: (rows) => rows.forEach(r => dispatch(deleteNote(r.id)))
+                },
             ]
         }}
         columns={[

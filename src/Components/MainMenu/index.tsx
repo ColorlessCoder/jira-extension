@@ -95,7 +95,7 @@ export default function MainMenu() {
         dispatch(loadPendingWorkLogs())
           .then(() => history.push("/work-log"))
       } else {
-        history.push("/settings")
+        history.push({ pathname: "/settings", state: {errorConnect: true}})
       }
     }
   }, [jiraDomainUrl, loading])

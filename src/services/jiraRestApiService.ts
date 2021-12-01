@@ -11,20 +11,9 @@ export default class JiraRestApiService {
     private Environment: "development" | "production";
     constructor(env?: "development" | "production") {
         this.JiraDomainUrl = "";
-        // this.JiraDomainUrl = "https://shakil-pet.atlassian.net";
         this.Environment = (process.env.NODE_ENV === "development") ? "development" : "production"
-        // if(env) {
-        //     this.Environment = env
-        // }
-        // if (this.Environment !== "development") {
-        //     this.JiraDomainUrl = "https://customerportal.tiptech.com";
-        // }
         this.JiraRestVersion = 2
         this.JiraCurrentUser = ""
-        // this.JiraCurrentUser = "shakil.ruet.uva@gmail.com"
-        // if (this.Environment !== "development") {
-        //     this.JiraCurrentUser = "munawar.hussain@enosisbd.com"
-        // }
     }
 
     getJiraCurrentUser = () => {
