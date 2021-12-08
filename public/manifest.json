@@ -1,7 +1,7 @@
 {
-  "name": "Work Log Assistant",
-  "description": "Help task tracking easier",
-  "version": "1.0",
+  "name": "Jira time tracker",
+  "description": "Help jira time tracking easier",
+  "version": "0.0.0.1",
   "manifest_version": 3,
   "permissions": [
     "storage"
@@ -11,9 +11,9 @@
     "default_title": "Open the popup"
   },
   "icons": {
-    "16": "logo192.png",
-    "48": "logo192.png",
-    "128": "logo192.png"
+    "16": "logo.png",
+    "48": "logo.png",
+    "128": "logo.png"
   },
   "host_permissions": [
     "https://*/"
