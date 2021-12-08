@@ -1,7 +1,6 @@
 import { Avatar, Chip, createStyles, makeStyles } from "@material-ui/core";
-import { Receipt } from "@material-ui/icons";
 import React, { useEffect, useState } from "react";
-import { CommentSuggestionsInt, JiraUserInt } from "../../types";
+import { CommentSuggestionsInt } from "../../types";
 import HorizontalView from "./HorizontalView";
 import lodash from 'lodash'
 import StaticServices from "../../services";
@@ -70,48 +69,6 @@ export default function CommentSuggestions({ issueKey, onClick }: {
     }
     useEffect(() => {
         const newSuggestions: CommentSuggestionsInt[] = []
-        // newSuggestions.push({
-        //     label: "DS",
-        //     avatarString: "D",
-        //     comment: "Daily Scrum"
-        // });
-        // newSuggestions.push({
-        //     label: "MS",
-        //     avatarString: "M",
-        //     comment: "Midday Scrum"
-        // });
-        // newSuggestions.push({
-        //     label: "WM",
-        //     avatarString: "W",
-        //     comment: "Weekly Meeting"
-        // });
-        newSuggestions.push({
-            label: "Review Code",
-            avatarLinkParams: [["customfield_10901", "assignee"], ["avatarUrls"], ["48x48", "32x32", "24x24", "16x16"]],
-            comment: `Review code changes of $$assignee`,
-            commentParams: [{ key: "assignee", properties: [["customfield_10901", "assignee"], ["displayName"]] }]
-        });
-        newSuggestions.push({
-            label: "Discussion",
-            avatarLinkParams:  [["customfield_10901", "assignee"], ["avatarUrls"], ["48x48", "32x32", "24x24", "16x16"]],
-            comment: `Discussion with $$assignee`,
-            commentParams: [{ key: "assignee", properties: [["customfield_10901", "assignee"], ["displayName"]] }]
-        });
-        // newSuggestions.push({
-        //     label: "Badri",
-        //     avatarString: "B",
-        //     comment: "Discussion with Badri"
-        // });
-        // newSuggestions.push({
-        //     label: "Muntasir",
-        //     avatarString: "M",
-        //     comment: "Discussion with Muntasir"
-        // });
-        // newSuggestions.push({
-        //     label: "Nazim",
-        //     avatarString: "N",
-        //     comment: "Discussion with Nazim"
-        // });
         newSuggestions.push({
             label: "Bug",
             avatarString: "C",
@@ -122,18 +79,18 @@ export default function CommentSuggestions({ issueKey, onClick }: {
             avatarString: "C",
             comment: `Analysis of the requirement and implement`,
         });
-        // newSuggestions.push({
-        //     label: "Review Assignee",
-        //     avatarLinkParams: [["assignee"], ["avatarUrls"], ["48x48", "32x32", "24x24", "16x16"]],
-        //     comment: `Review code changes of $$assignee`,
-        //     commentParams: [{ key: "assignee", properties: [["assignee"], ["displayName"]] }]
-        // });
-        // newSuggestions.push({
-        //     label: "Discussion Assignee",
-        //     avatarLinkParams:  [["assignee"], ["avatarUrls"], ["48x48", "32x32", "24x24", "16x16"]],
-        //     comment: `Discussion with $$assignee`,
-        //     commentParams: [{ key: "assignee", properties: [["assignee"], ["displayName"]] }]
-        // });
+        newSuggestions.push({
+            label: "Review Assignee",
+            avatarLinkParams: [["assignee"], ["avatarUrls"], ["48x48", "32x32", "24x24", "16x16"]],
+            comment: `Review code changes of $$assignee`,
+            commentParams: [{ key: "assignee", properties: [["assignee"], ["displayName"]] }]
+        });
+        newSuggestions.push({
+            label: "Discussion Assignee",
+            avatarLinkParams:  [["assignee"], ["avatarUrls"], ["48x48", "32x32", "24x24", "16x16"]],
+            comment: `Discussion with $$assignee`,
+            commentParams: [{ key: "assignee", properties: [["assignee"], ["displayName"]] }]
+        });
         setSuggestions(newSuggestions);
     }, [])
     useEffect(() => {
