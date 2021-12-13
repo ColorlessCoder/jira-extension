@@ -1,5 +1,7 @@
 # Jira Time Tracker (chrome extension)
 
+A chrome extension to track jira work logs happily.
+
 ## How to install:
 - Download the [build.rar](https://github.com/ColorlessCoder/jira-extension/blob/main/build.rar) file
 - Extract the rar file
